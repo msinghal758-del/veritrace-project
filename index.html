@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>VeriTrace — The clock is running</title>
+<meta name="description" content="VeriTrace guides bank incident responders step by step, keeps a tamper-evident record, and drafts the regulator report before the deadline.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFFFFF">
+<meta property="og:type" content="website">
+<meta property="og:title" content="VeriTrace — The clock is running">
+<meta property="og:description" content="An AI incident-response assistant for banks: NIST-phased steps, a tamper-evident evidence log, and live regulatory deadline clocks.">
+<meta property="og:image" content="/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --white:#FFFFFF; --wash:#F5F8FA; --ink:#0F2A3A; --muted:#5E7482; --line:#E3EAEF;
+  --tide:#1D6E8C; --tide-deep:#14556D; --sky:#E6F1F6; --sky-2:#CFE3EC;
+  --mint:#E3F4EE; --green:#1C7A57; --amber:#FFF4E0; --amber-ink:#8A5A00; --alert:#B8322C; --alert-soft:#FCEDEC;
+  --display:"Instrument Serif", "Lora", Georgia, serif;
+  --ui:"Geist", "Poppins", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --code:ui-monospace, "SFMono-Regular", "DejaVu Sans Mono", Menlo, Consolas, monospace;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--white);color:var(--ink);font:400 16px/1.6 var(--ui);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+img,svg{max-width:100%}
+button{font-family:inherit}
+:focus-visible{outline:2.5px solid var(--tide);outline-offset:3px;border-radius:6px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 40px}
+[hidden]{display:none!important}
+
+.btn{appearance:none;border:0;cursor:pointer;font:500 15px/1 var(--ui);border-radius:999px;padding:14px 24px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:background-color .2s,color .2s,border-color .2s}
+.btn-solid{background:var(--ink);color:#fff}
+.btn-solid:hover{background:var(--tide-deep)}
+.btn-line{background:var(--white);color:var(--ink);border:1.5px solid var(--line)}
+.btn-line:hover{border-color:var(--tide);color:var(--tide)}
+.btn-text{background:transparent;color:var(--ink);padding:10px 6px}
+.btn-text:hover{color:var(--tide)}
+.btn-sm{padding:10px 18px;font-size:14px}
+.btn-xs{padding:7px 13px;font-size:13px}
+
+.nav{display:flex;align-items:center;justify-content:space-between;padding:26px 0}
+.brand{font:400 30px/1 var(--display);text-decoration:none;letter-spacing:-.01em;display:inline-flex;align-items:center;gap:10px}
+.brand svg{width:26px;height:26px}
+.nav-right{display:flex;align-items:center;gap:22px}
+.nav-link{font-size:15px;color:var(--muted);text-decoration:none}
+.nav-link:hover{color:var(--ink)}
+
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center;padding:56px 0 96px}
+.hero h1{font:400 clamp(40px,4.6vw,60px)/1.05 var(--display);margin:0 0 6px;letter-spacing:-.01em}
+.hero .tag{font-size:19px;color:var(--muted);margin:0 0 28px;max-width:40ch}
+.clock{font:400 clamp(72px,10vw,132px)/.95 var(--display);letter-spacing:-.02em;display:flex;align-items:baseline;margin:0 0 10px}
+.clock .d{display:inline-block;width:.52em;text-align:center}
+.clock .c{display:inline-block;width:.26em;text-align:center;color:var(--tide);transform:translateY(-.06em)}
+.clock-note{font-size:14px;color:var(--muted);margin:0 0 34px}
+.actions{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.hero-art{width:100%;height:auto}
+
+.band{padding:104px 0;border-top:1px solid var(--line)}
+.band.wash{background:var(--wash)}
+.head{max-width:640px;margin:0 0 56px}
+.head h2{font:400 clamp(34px,4vw,50px)/1.08 var(--display);margin:0 0 14px;letter-spacing:-.005em}
+.head p{margin:0;color:var(--muted);font-size:18px;line-height:1.6}
+
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.feature{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:28px 28px 30px}
+.feature svg{width:100%;height:auto;display:block;margin:0 0 22px;border-radius:14px}
+.feature h3{font:600 19px/1.3 var(--ui);margin:0 0 8px}
+.feature p{margin:0;color:var(--muted);font-size:15.5px}
+
+.track{position:relative;height:96px;margin:8px 0 0}
+.track .rail{position:absolute;left:0;right:0;top:44px;height:2px;background:var(--line)}
+.mark{position:absolute;top:0;white-space:nowrap}
+.mark b{display:block;font:400 28px/1 var(--display)}
+.mark span{display:block;font-size:14px;color:var(--muted);margin-top:28px}
+.mark::after{content:"";position:absolute;top:38px;left:0;width:14px;height:14px;border-radius:50%;background:var(--white);border:2.5px solid var(--tide)}
+.mark.end{transform:translateX(-100%);text-align:right}
+.mark.end::after{left:auto;right:0}
+.reg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:48px}
+.reg{border-left:2px solid var(--sky-2);padding:2px 0 2px 18px}
+.reg b{display:block;font-weight:600;font-size:16px}
+.reg span{display:block;color:var(--muted);font-size:14.5px}
+
+.split{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+.roles{list-style:none;margin:0;padding:0}
+.roles li{padding:20px 0;border-bottom:1px solid var(--line)}
+.roles li:first-child{border-top:1px solid var(--line)}
+.roles b{display:block;font-weight:600;font-size:17px;margin-bottom:4px}
+.roles span{color:var(--muted);font-size:15.5px}
+
+.closing{text-align:center;padding:112px 0}
+.closing h2{font:400 clamp(36px,4.6vw,58px)/1.08 var(--display);margin:0 auto 14px;max-width:20ch}
+.closing p{color:var(--muted);margin:0 auto 30px;max-width:48ch;font-size:18px}
+.foot{border-top:1px solid var(--line);padding:28px 0 36px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:14px;color:var(--muted)}
+
+dialog{border:0;padding:0;border-radius:24px;width:min(460px,calc(100vw - 32px));background:var(--white);color:var(--ink);box-shadow:0 40px 80px -30px rgba(15,42,58,.4),0 0 0 1px var(--line);max-height:calc(100vh - 32px)}
+dialog.wide{width:min(760px,calc(100vw - 32px))}
+dialog::backdrop{background:rgba(15,42,58,.22);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+dialog[open]{animation:rise .26s cubic-bezier(.2,.8,.2,1)}
+@keyframes rise{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:none}}
+.dlg{padding:34px 34px 30px;position:relative}
+.dlg h2{font:400 34px/1.1 var(--display);margin:0 0 6px}
+.dlg .sub{margin:0 0 24px;color:var(--muted);font-size:15px}
+.close{position:absolute;top:16px;right:16px;width:38px;height:38px;border-radius:50%;border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:22px;line-height:1}
+.close:hover{background:var(--wash);color:var(--ink)}
+.field{margin:0 0 14px}
+.field label{display:block;font-size:14px;font-weight:500;margin:0 0 6px}
+.field input,.field select,.field textarea{width:100%;font:400 16px/1.3 var(--ui);color:var(--ink);background:var(--wash);border:1.5px solid transparent;border-radius:12px;padding:12px 14px}
+.field textarea{resize:vertical;min-height:70px}
+.field select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 20px) 55%,calc(100% - 15px) 55%;background-size:5px 5px;background-repeat:no-repeat;padding-right:40px}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--tide);background-color:var(--white)}
+.field [aria-invalid="true"]{border-color:var(--alert)}
+.err{display:block;font-size:13px;color:var(--alert);margin-top:6px}
+.err:empty{display:none}
+.form-err{background:var(--alert-soft);color:var(--alert);border-radius:12px;padding:10px 14px;font-size:14px;margin:0 0 14px}
+.form-err:empty{display:none}
+.dlg .full{width:100%;padding:15px}
+.switch{text-align:center;font-size:14px;color:var(--muted);margin:18px 0 0}
+.switch button{background:none;border:0;color:var(--tide);font:500 14px var(--ui);cursor:pointer;padding:0}
+.divider{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px;margin:16px 0}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;margin:0 0 12px}
+.check input{margin-top:3px;width:17px;height:17px;accent-color:var(--tide)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.app{min-height:100vh;background:var(--wash)}
+.topbar{background:var(--white);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;padding-top:env(safe-area-inset-top,0px)}
+.topbar .wrap{display:flex;align-items:center;justify-content:space-between;height:68px;max-width:1320px}
+.topbar .brand{font-size:26px}
+.user{display:flex;align-items:center;gap:14px;font-size:14px}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--sky);color:var(--tide-deep);display:grid;place-items:center;font-weight:600;font-size:14px}
+.user .who{line-height:1.25}
+.user .who small{display:block;color:var(--muted)}
+.console{max-width:1320px;padding-top:32px;padding-bottom:64px}
+.welcome{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin:0 0 24px}
+.welcome h1{font:400 38px/1.1 var(--display);margin:0 0 4px}
+.welcome p{margin:0;color:var(--muted)}
+.card{background:var(--white);border:1px solid var(--line);border-radius:18px}
+.card-h{padding:20px 24px 0}
+.card-h h2{font:600 17px/1.3 var(--ui);margin:0}
+.card-h p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.card-b{padding:18px 24px 22px}
+.vh{position:absolute;left:-9999px}
+
+.incident{display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center;padding:22px 24px;margin:0 0 20px}
+.incident .ill{width:76px;height:76px}
+.inc-meta{font-size:13.5px;color:var(--muted)}
+.inc-title{font:400 30px/1.15 var(--display);margin:2px 0 8px}
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{font-size:12.5px;font-weight:500;padding:5px 11px;border-radius:99px;background:var(--wash);color:var(--ink)}
+.pill.crit{background:var(--alert-soft);color:var(--alert)}
+.pill.phase{background:var(--sky);color:var(--tide-deep)}
+.inc-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+
+.clocks{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:0 0 20px}
+.rclock{padding:18px 20px 16px}
+.rclock .name{display:flex;justify-content:space-between;gap:8px;font-weight:600;font-size:14.5px}
+.rclock .rule{color:var(--muted);font-size:12.5px;margin:2px 0 10px}
+.rclock .time{font:400 44px/1 var(--display);letter-spacing:-.01em;font-variant-numeric:tabular-nums;margin:0 0 4px}
+.rclock .due{font-size:13px;color:var(--muted);margin:0 0 12px}
+.bar{height:6px;border-radius:6px;background:var(--wash);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--tide);border-radius:6px;transition:width .4s}
+.rclock .foot2 .btn{white-space:nowrap;flex:none}
+.rclock .foot2{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:12.5px;color:var(--muted);gap:8px;min-height:30px}
+.state{font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.state.run{background:var(--sky);color:var(--tide-deep)}
+.state.soon{background:var(--amber);color:var(--amber-ink)}
+.state.late{background:var(--alert-soft);color:var(--alert)}
+.state.done{background:var(--mint);color:var(--green)}
+.state.off{background:var(--white);color:var(--muted)}
+.rclock.soon .time{color:var(--amber-ink)}
+.rclock.soon .bar i{background:#D08A1A}
+.rclock.late .time{color:var(--alert)}
+.rclock.late .bar i{background:var(--alert)}
+.rclock.done .time{color:var(--green)}
+.rclock.done .bar i{background:var(--green)}
+.rclock.off{background:var(--wash)}
+.rclock.off .time{color:#A9B7C0}
+
+.cols{display:grid;grid-template-columns:1.45fr 1fr;gap:20px;align-items:start}
+.stack{display:grid;gap:20px}
+.phases{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:18px 24px 0}
+.ph{appearance:none;background:var(--white);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;text-align:left;cursor:pointer;color:var(--ink)}
+.ph small{display:block;color:var(--muted);font-size:12px;margin-bottom:2px}
+.ph b{display:block;font-weight:600;font-size:14px;line-height:1.3}
+.ph .pbar{height:4px;border-radius:4px;background:var(--wash);margin-top:10px;overflow:hidden}
+.ph .pbar i{display:block;height:100%;background:var(--tide)}
+.ph[aria-selected="true"]{border-color:var(--tide);background:var(--sky)}
+.ph.complete .pbar i{background:var(--green)}
+.steps{list-style:none;margin:0;padding:0}
+.step{display:grid;grid-template-columns:auto 1fr;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+.step:last-child{border-bottom:0}
+.step input{width:20px;height:20px;margin-top:2px;accent-color:var(--green);cursor:pointer}
+.step label{cursor:pointer;font-weight:500}
+.step.is-done label{color:var(--muted);text-decoration:line-through;text-decoration-color:#A9B7C0}
+.step .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;font-size:12.5px}
+.atk{background:var(--sky);color:var(--tide-deep);padding:3px 9px;border-radius:99px;font-weight:500}
+.src{color:var(--muted);padding:3px 0}
+.who-did{color:var(--green);padding:3px 0}
+
+.trig{list-style:none;margin:0;padding:0}
+.trig li{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.trig li:last-child{border-bottom:0}
+.dot{width:10px;height:10px;border-radius:50%;margin-top:7px;background:var(--tide)}
+.dot.off{background:#C5D1D8}
+.dot.ok{background:var(--green)}
+.trig b{font-weight:600}
+.trig span{display:block;color:var(--muted);font-size:13.5px}
+
+.chain-status{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--mint);color:var(--green);border-radius:12px;padding:10px 14px;font-size:13.5px;font-weight:500;margin:0 0 14px}
+.chain-status.bad{background:var(--alert-soft);color:var(--alert)}
+.log{list-style:none;margin:0;padding:0;max-height:440px;overflow:auto}
+.log li{position:relative;padding:0 0 18px 24px}
+.log li::before{content:"";position:absolute;left:5px;top:10px;bottom:-4px;width:2px;background:var(--line)}
+.log li:last-child::before{display:none}
+.log li::after{content:"";position:absolute;left:0;top:5px;width:12px;height:12px;border-radius:50%;background:var(--white);border:2.5px solid var(--tide)}
+.log .t{font-size:12.5px;color:var(--muted)}
+.log .a{font-weight:500;font-size:14.5px;line-height:1.4}
+.log code{display:block;font:11.5px/1.5 var(--code);color:var(--muted);word-break:break-all;margin-top:2px}
+.add-ev{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.add-ev input[type=text]{font:400 14.5px var(--ui);border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;min-width:0}
+.add-ev input[type=text]:focus{outline:none;border-color:var(--tide)}
+.file-row{grid-column:1/-1;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.file-row input{font-size:13px;max-width:100%}
+
+.report{font-size:14.5px;line-height:1.6;max-height:58vh;overflow:auto;border:1px solid var(--line);border-radius:14px;padding:22px 24px;background:var(--white)}
+.report h3{font:400 24px/1.2 var(--display);margin:0 0 4px}
+.report h4{font-size:14px;font-weight:600;margin:18px 0 6px;color:var(--tide-deep)}
+.report .tw{overflow-x:auto}
+.report table{width:100%;border-collapse:collapse;font-size:13.5px}
+.report td,.report th{text-align:left;padding:6px 8px 6px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.report th{font-weight:600;color:var(--muted);font-size:12.5px}
+.report code{font:11.5px var(--code);word-break:break-all}
+.report ul{margin:0;padding-left:18px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;z-index:50;box-shadow:0 12px 30px -12px rgba(15,42,58,.5);max-width:calc(100vw - 32px)}
+
+/* glass buttons */
+.nav-actions{position:relative;isolation:isolate;display:flex;gap:10px;align-items:center}
+.nav-actions::before{content:"";position:absolute;z-index:-1;left:-18px;right:-18px;top:-14px;bottom:-14px;border-radius:40px;
+  background:radial-gradient(90px 40px at 25% 50%,rgba(120,190,220,.55),transparent 72%),radial-gradient(110px 44px at 75% 50%,rgba(29,110,140,.45),transparent 72%);
+  filter:blur(14px);pointer-events:none}
+.btn-glass-sm{padding:11px 20px;font-size:14px}
+.btn-glass{white-space:nowrap}
+@media (max-width:440px){.nav .brand{font-size:22px;gap:0}.nav .brand svg{display:none}.nav{margin:0 -8px}.btn-glass-sm{padding:9px 12px;font-size:12.5px}.nav-actions{gap:6px}.nav-actions::before{left:-6px;right:-6px}}
+
+.hero-actions{position:relative;isolation:isolate;padding:10px 0}
+.hero-actions::before{content:"";position:absolute;z-index:-1;left:-30px;top:-26px;width:430px;height:120px;border-radius:60px;
+  background:radial-gradient(120px 80px at 22% 55%,rgba(29,110,140,.55),transparent 70%),radial-gradient(150px 90px at 62% 45%,rgba(120,190,220,.55),transparent 72%),radial-gradient(110px 70px at 88% 60%,rgba(170,215,235,.7),transparent 70%);
+  filter:blur(18px);pointer-events:none}
+.btn-glass{position:relative;overflow:hidden;isolation:isolate;padding:15px 26px;color:var(--ink);
+  background:rgba(255,255,255,.42);border:1px solid rgba(255,255,255,.75);
+  -webkit-backdrop-filter:blur(16px) saturate(170%);backdrop-filter:blur(16px) saturate(170%);
+  box-shadow:0 10px 30px -12px rgba(15,42,58,.35),inset 0 1px 0 rgba(255,255,255,.95),inset 0 -1px 0 rgba(15,42,58,.06)}
+.btn-glass-dark{color:#fff;background:rgba(15,42,58,.84);border-color:rgba(255,255,255,.28);
+  box-shadow:0 12px 30px -12px rgba(15,42,58,.6),inset 0 1px 0 rgba(255,255,255,.25)}
+.btn-glass .g-label{position:relative;z-index:2}
+.btn-glass .g-fill{position:absolute;inset:0;z-index:0;border-radius:inherit;transform:translateX(-101%);
+  background:linear-gradient(90deg,rgba(29,110,140,.16),rgba(29,110,140,.26))}
+.btn-glass-dark .g-fill{background:linear-gradient(90deg,rgba(29,110,140,.85),rgba(20,85,109,.95))}
+.btn-glass .g-sheen{position:absolute;z-index:1;top:-20%;bottom:-20%;left:0;width:45%;transform:translateX(-160%) skewX(-20deg);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.65),transparent);pointer-events:none}
+.btn-glass-dark .g-sheen{background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent)}
+.btn-glass:hover{color:var(--ink)}
+.btn-glass-dark:hover{color:#fff;background:rgba(15,42,58,.84)}
+.no-gsap .btn-glass:hover .g-fill{transform:none;transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion: reduce){.btn-glass .g-sheen{display:none}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.btn-glass{background:rgba(255,255,255,.9)}.btn-glass-dark{background:var(--ink)}}
+
+@media (max-width:1080px){.clocks{grid-template-columns:repeat(2,1fr)}.cols{grid-template-columns:1fr}}
+@media (max-width:900px){
+  .wrap{padding:0 24px}
+  .hero{grid-template-columns:1fr;padding-top:24px}
+  .hero-art{max-width:460px}
+  .features{grid-template-columns:1fr}
+  .split{grid-template-columns:1fr;gap:36px}
+  .reg-grid{grid-template-columns:1fr 1fr}
+  .nav-link{display:none}
+  .incident{grid-template-columns:1fr}
+  .incident .ill{display:none}
+  .inc-actions{justify-content:flex-start}
+  .user .who{display:none}
+}
+@media (max-width:620px){
+  .nav-right{gap:10px}
+  .hero-actions::before{width:100%;left:0}
+  .phases{grid-template-columns:1fr 1fr}
+  .clocks{grid-template-columns:1fr}
+  .track{height:auto;border-left:2px solid var(--tide);padding-left:18px}
+  .track .rail{display:none}
+  .mark,.mark.end{position:static;transform:none;text-align:left;display:flex;gap:14px;align-items:baseline;padding:8px 0}
+  .mark::after{display:none}
+  .mark span{margin:0}
+  .reg-grid{grid-template-columns:1fr}
+  .dlg{padding:30px 22px 24px}
+  .row2{grid-template-columns:1fr}
+  .band{padding:72px 0}
+  .welcome h1{font-size:32px}
+}
+@media (prefers-reduced-motion: reduce){dialog[open]{animation:none}.bar i{transition:none}}
+
+/* Console Navigation & ML Tabs */
+.console-nav{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:0 0 24px;border-bottom:1px solid var(--line);padding-bottom:16px}
+.c-tabs{display:inline-flex;gap:6px;background:var(--wash);padding:4px;border-radius:999px;border:1px solid var(--line)}
+.c-tab{appearance:none;border:0;background:transparent;color:var(--muted);font:500 14px/1 var(--ui);padding:9px 18px;border-radius:999px;cursor:pointer;transition:all .2s}
+.c-tab:hover{color:var(--ink)}
+.c-tab.active{background:var(--white);color:var(--ink);font-weight:600;box-shadow:0 2px 8px -2px rgba(15,42,58,.12)}
+.ml-status-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;font-size:12.5px;font-weight:500;background:var(--wash);border:1px solid var(--line);color:var(--muted)}
+.ml-status-badge.ready{background:var(--mint);color:var(--green);border-color:rgba(28,122,87,.25)}
+.ml-status-badge.offline{background:var(--amber);color:var(--amber-ink);border-color:rgba(138,90,0,.25)}
+
+/* Metric Cards Grid */
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:0 0 24px}
+@media (max-width:1080px){.metric-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:580px){.metric-grid{grid-template-columns:1fr}}
+.metric-card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:18px 20px}
+.metric-card .label{font-size:12.5px;color:var(--muted);font-weight:500;margin-bottom:6px}
+.metric-card .val{font:400 34px/1 var(--display);letter-spacing:-.01em;color:var(--ink)}
+.metric-card .sub{font-size:12px;color:var(--muted);margin-top:6px}
+
+/* Feature Form Grid */
+.feature-form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}
+@media (max-width:960px){.feature-form-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:520px){.feature-form-grid{grid-template-columns:1fr}}
+.presets-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0 16px}
+.presets-label{font-size:13px;font-weight:500;color:var(--muted)}
+.btn-preset{appearance:none;border:1px solid var(--line);background:var(--wash);border-radius:999px;padding:6px 13px;font:500 12.5px var(--ui);cursor:pointer;color:var(--ink);transition:all .15s}
+.btn-preset:hover{border-color:var(--tide);background:var(--sky);color:var(--tide-deep)}
+
+/* Prediction Result Panel */
+.pred-card{background:var(--white);border:1.5px solid var(--sky-2);border-radius:18px;padding:24px;margin-top:20px}
+.pred-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:16px}
+.pred-title{font:400 32px/1.1 var(--display);margin:4px 0 6px}
+.prob-list{display:grid;gap:8px;margin-top:14px}
+.prob-row{display:grid;grid-template-columns:130px 1fr 60px;align-items:center;gap:12px;font-size:13px}
+.prob-track{height:6px;background:var(--wash);border-radius:4px;overflow:hidden}
+.prob-fill{height:100%;background:var(--tide);border-radius:4px;transition:width .4s ease}
+.prob-val{text-align:right;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* Callout and Tables */
+.alert-callout{background:var(--sky);border:1px solid var(--sky-2);border-radius:14px;padding:16px 20px;font-size:13.5px;color:var(--tide-deep);margin:0 0 20px;line-height:1.55}
+.alert-callout b{color:var(--ink)}
+.matrix-table{width:100%;border-collapse:collapse;font-size:12px;text-align:center;min-width:600px}
+.matrix-table th,.matrix-table td{padding:8px 6px;border:1px solid var(--line)}
+.matrix-table th{background:var(--wash);font-weight:600;color:var(--ink)}
+.matrix-table td.diag{background:rgba(29,110,140,.18);font-weight:600;color:var(--tide-deep)}
+.matrix-table td.nz{background:rgba(184,50,44,.06);color:var(--ink)}
+</style>
+</head>
+<body>
+
+<div id="view-landing">
+  <div class="wrap">
+    <nav class="nav" aria-label="Main">
+      <a class="brand" href="#/"><svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="14" r="10.5" fill="none" stroke="#0F2A3A" stroke-width="2.2"/><path d="M13 14V8" stroke="#1D6E8C" stroke-width="2.2" stroke-linecap="round"/><path d="M10 2h6" stroke="#0F2A3A" stroke-width="2.2" stroke-linecap="round"/></svg>VeriTrace</a>
+      <div class="nav-right">
+        <a class="nav-link" href="#features">How it works</a>
+        <a class="nav-link" href="#deadlines">Deadlines</a>
+        <div class="nav-actions">
+          <button class="btn btn-glass btn-glass-sm" type="button" data-auth="signin"><span class="g-fill" aria-hidden="true"></span><span class="g-sheen" aria-hidden="true"></span><span class="g-label">Sign in</span></button>
+          <button class="btn btn-glass btn-glass-dark btn-glass-sm" type="button" data-auth="signup"><span class="g-fill" aria-hidden="true"></span><span class="g-sheen" aria-hidden="true"></span><span class="g-label">Create account</span></button>
+        </div>
+      </div>
+    </nav>
+
+    <header class="hero" id="top">
+      <div>
+        <h1>The clock is running.</h1>
+        <p class="tag">When a bank is breached, regulators start counting. VeriTrace makes sure your team is never behind.</p>
+        <div class="clock" role="timer" aria-label="Example GDPR countdown">
+          <span class="d">7</span><span class="d">2</span><span class="c">:</span><span class="d">0</span><span class="d">0</span><span class="c">:</span><span class="d">0</span><span class="d">0</span>
+        </div>
+        <p class="clock-note">Time left to notify the regulator under GDPR, if a breach had been found when you opened this page.</p>
+        <div class="actions hero-actions">
+          <button class="btn btn-glass btn-glass-dark" type="button" data-auth="signup"><span class="g-fill" aria-hidden="true"></span><span class="g-sheen" aria-hidden="true"></span><span class="g-label">Create account</span></button>
+          <button class="btn btn-glass" type="button" data-demo><span class="g-fill" aria-hidden="true"></span><span class="g-sheen" aria-hidden="true"></span><span class="g-label">Try the demo console</span></button>
+        </div>
+      </div>
+      <svg class="hero-art" viewBox="0 0 480 420" role="img" aria-label="Illustration of a stopwatch, a protective shield and an incident report">
+        <circle cx="250" cy="210" r="190" fill="#F3F8FB"/>
+        <circle cx="250" cy="210" r="140" fill="#E6F1F6"/>
+        <g transform="rotate(-7 150 250)">
+          <rect x="70" y="150" width="150" height="196" rx="14" fill="#fff" stroke="#CFE3EC" stroke-width="2"/>
+          <rect x="92" y="176" width="70" height="10" rx="5" fill="#0F2A3A"/>
+          <rect x="92" y="200" width="104" height="7" rx="3.5" fill="#CFE3EC"/>
+          <rect x="92" y="216" width="92" height="7" rx="3.5" fill="#CFE3EC"/>
+          <rect x="92" y="232" width="100" height="7" rx="3.5" fill="#CFE3EC"/>
+          <rect x="92" y="258" width="104" height="44" rx="8" fill="#E6F1F6"/>
+          <path d="M104 290l14-14 12 9 20-20" fill="none" stroke="#1D6E8C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="92" y="316" width="60" height="7" rx="3.5" fill="#CFE3EC"/>
+        </g>
+        <rect x="262" y="52" width="36" height="20" rx="6" fill="#0F2A3A"/>
+        <rect x="274" y="68" width="12" height="16" fill="#0F2A3A"/>
+        <circle cx="280" cy="190" r="108" fill="#fff" stroke="#0F2A3A" stroke-width="6"/>
+        <circle cx="280" cy="190" r="92" fill="none" stroke="#E6F1F6" stroke-width="14"/>
+        <path d="M280 98 A92 92 0 0 1 369.3 212" fill="none" stroke="#1D6E8C" stroke-width="14" stroke-linecap="round"/>
+        <g stroke="#0F2A3A" stroke-width="3" stroke-linecap="round"><path d="M280 112v10M358 190h-10M280 268v-10M202 190h10"/></g>
+        <path d="M280 190V132" stroke="#0F2A3A" stroke-width="5" stroke-linecap="round"/>
+        <path d="M280 190l38 22" stroke="#1D6E8C" stroke-width="5" stroke-linecap="round"/>
+        <circle cx="280" cy="190" r="8" fill="#0F2A3A"/>
+        <path d="M372 250c22 8 40 8 58 0v46c0 30-24 48-29 51-5-3-29-21-29-51z" fill="#1D6E8C"/>
+        <path d="M387 294l10 10 20-22" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        <g fill="none" stroke-width="5"><rect x="300" y="336" width="44" height="26" rx="13" stroke="#1D6E8C"/><rect x="330" y="336" width="44" height="26" rx="13" stroke="#0F2A3A"/></g>
+        <circle cx="96" cy="112" r="6" fill="#CFE3EC"/><circle cx="430" cy="140" r="5" fill="#CFE3EC"/><circle cx="420" cy="380" r="7" fill="#E6F1F6"/>
+      </svg>
+    </header>
+  </div>
+
+  <section class="band wash" id="features" aria-labelledby="f-title">
+    <div class="wrap">
+      <div class="head">
+        <h2 id="f-title">How VeriTrace works</h2>
+        <p>Three things every response team needs under pressure: a clear next step, proof of what was done, and a report ready before the deadline.</p>
+      </div>
+      <div class="features">
+        <article class="feature">
+          <svg viewBox="0 0 320 170" aria-hidden="true">
+            <rect width="320" height="170" fill="#E6F1F6"/>
+            <path d="M40 120 C100 120 90 60 160 60 S230 110 280 60" fill="none" stroke="#CFE3EC" stroke-width="10" stroke-linecap="round"/>
+            <path d="M40 120 C100 120 90 60 160 60" fill="none" stroke="#1D6E8C" stroke-width="10" stroke-linecap="round"/>
+            <circle cx="40" cy="120" r="14" fill="#0F2A3A"/><circle cx="104" cy="98" r="14" fill="#0F2A3A"/>
+            <circle cx="160" cy="60" r="16" fill="#fff" stroke="#1D6E8C" stroke-width="6"/>
+            <circle cx="222" cy="88" r="12" fill="#fff" stroke="#CFE3EC" stroke-width="5"/>
+            <path d="M280 60V22" stroke="#0F2A3A" stroke-width="5" stroke-linecap="round"/>
+            <path d="M282 24h28l-8 10 8 10h-28z" fill="#1D6E8C"/>
+            <path d="M34 120l5 5 9-10" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+            <path d="M98 98l5 5 9-10" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+          <h3>Know the next step</h3>
+          <p>Guidance for each of the four NIST incident phases, with every action linked to the MITRE ATT&amp;CK technique it answers and the playbook it came from.</p>
+        </article>
+        <article class="feature">
+          <svg viewBox="0 0 320 170" aria-hidden="true">
+            <rect width="320" height="170" fill="#E6F1F6"/>
+            <rect x="26" y="52" width="76" height="66" rx="12" fill="#fff" stroke="#0F2A3A" stroke-width="4"/>
+            <rect x="122" y="52" width="76" height="66" rx="12" fill="#fff" stroke="#0F2A3A" stroke-width="4"/>
+            <rect x="218" y="52" width="76" height="66" rx="12" fill="#fff" stroke="#1D6E8C" stroke-width="4"/>
+            <path d="M102 85h20M198 85h20" stroke="#1D6E8C" stroke-width="5"/>
+            <rect x="40" y="70" width="40" height="6" rx="3" fill="#CFE3EC"/><rect x="40" y="84" width="48" height="6" rx="3" fill="#CFE3EC"/><rect x="40" y="98" width="30" height="6" rx="3" fill="#1D6E8C"/>
+            <rect x="136" y="70" width="40" height="6" rx="3" fill="#CFE3EC"/><rect x="136" y="84" width="48" height="6" rx="3" fill="#CFE3EC"/><rect x="136" y="98" width="30" height="6" rx="3" fill="#1D6E8C"/>
+            <rect x="232" y="70" width="40" height="6" rx="3" fill="#CFE3EC"/><rect x="232" y="84" width="48" height="6" rx="3" fill="#CFE3EC"/><rect x="232" y="98" width="30" height="6" rx="3" fill="#1D6E8C"/>
+            <circle cx="282" cy="46" r="16" fill="#1D6E8C"/>
+            <path d="M274 46l6 6 10-11" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <h3>Prove what happened</h3>
+          <p>Every action, file and approval is time-stamped and chained to the entry before it with a SHA-256 hash, so any later change is obvious to an auditor.</p>
+        </article>
+        <article class="feature">
+          <svg viewBox="0 0 320 170" aria-hidden="true">
+            <rect width="320" height="170" fill="#E6F1F6"/>
+            <rect x="96" y="22" width="128" height="160" rx="12" fill="#fff" stroke="#0F2A3A" stroke-width="4"/>
+            <rect x="116" y="44" width="60" height="9" rx="4.5" fill="#0F2A3A"/>
+            <rect x="116" y="66" width="88" height="6" rx="3" fill="#CFE3EC"/><rect x="116" y="80" width="76" height="6" rx="3" fill="#CFE3EC"/><rect x="116" y="94" width="84" height="6" rx="3" fill="#CFE3EC"/>
+            <rect x="116" y="112" width="52" height="6" rx="3" fill="#CFE3EC"/>
+            <circle cx="230" cy="120" r="30" fill="#fff" stroke="#1D6E8C" stroke-width="5"/>
+            <path d="M230 102v18l12 8" fill="none" stroke="#0F2A3A" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="92" cy="126" r="20" fill="#1D6E8C"/>
+            <path d="M84 126l6 6 10-12" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <h3>Report on time</h3>
+          <p>A compliance-ready draft of the incident report, listing the notifications you owe, who they go to and when each one is due.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="deadlines" aria-labelledby="d-title">
+    <div class="wrap">
+      <div class="head">
+        <h2 id="d-title">Every deadline, visible from the first minute</h2>
+        <p>Banks in India have six hours to report a cyber incident, and seventy-two hours when personal data is involved. VeriTrace starts the right clocks the moment you log an incident.</p>
+      </div>
+      <div class="track" aria-label="Reporting deadlines after an incident is discovered">
+        <div class="rail"></div>
+        <div class="mark" style="left:0"><b>0 h</b><span>Discovery</span></div>
+        <div class="mark" style="left:8.33%"><b>6 h</b><span>CERT-In and RBI</span></div>
+        <div class="mark end" style="left:100%"><b>72 h</b><span>GDPR and DPDP</span></div>
+      </div>
+      <div class="reg-grid">
+        <div class="reg"><b>CERT-In, 6 hours</b><span>Directions of April 2022, for any reportable cyber incident.</span></div>
+        <div class="reg"><b>RBI, 6 hours</b><span>Cyber incidents at regulated banks and financial entities.</span></div>
+        <div class="reg"><b>GDPR, 72 hours</b><span>Article 33, when EU residents' personal data is breached.</span></div>
+        <div class="reg"><b>DPDP, 72 hours</b><span>Rule 7 detailed report to the Data Protection Board.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band wash" aria-labelledby="r-title">
+    <div class="wrap split">
+      <div>
+        <div class="head" style="margin-bottom:32px">
+          <h2 id="r-title">Built for the whole response team</h2>
+          <p>Everyone sees the same incident, the same clocks and the same record, so nothing gets lost between shifts.</p>
+        </div>
+        <ul class="roles">
+          <li><b>SOC analysts</b><span>Follow cited steps and log evidence as they work.</span></li>
+          <li><b>Incident response leads</b><span>Approve actions and track progress across all four phases.</span></li>
+          <li><b>CISOs and compliance teams</b><span>See which regulators must be told, and by when.</span></li>
+        </ul>
+      </div>
+      <svg viewBox="0 0 460 360" role="img" aria-label="Illustration of three team members around a shared incident dashboard">
+        <rect x="40" y="30" width="380" height="250" rx="22" fill="#fff" stroke="#CFE3EC" stroke-width="2"/>
+        <path d="M62 30h336a22 22 0 0 1 22 22v22H40V52a22 22 0 0 1 22-22z" fill="#E6F1F6"/>
+        <circle cx="66" cy="52" r="6" fill="#CFE3EC"/><circle cx="86" cy="52" r="6" fill="#CFE3EC"/>
+        <rect x="68" y="98" width="100" height="70" rx="12" fill="#E6F1F6"/><rect x="180" y="98" width="100" height="70" rx="12" fill="#E6F1F6"/><rect x="292" y="98" width="100" height="70" rx="12" fill="#1D6E8C"/>
+        <rect x="82" y="116" width="50" height="16" rx="4" fill="#0F2A3A"/><rect x="194" y="116" width="50" height="16" rx="4" fill="#0F2A3A"/><rect x="306" y="116" width="50" height="16" rx="4" fill="#fff"/>
+        <rect x="82" y="146" width="70" height="6" rx="3" fill="#CFE3EC"/><rect x="194" y="146" width="70" height="6" rx="3" fill="#CFE3EC"/><rect x="306" y="146" width="70" height="6" rx="3" fill="#CFE3EC"/>
+        <rect x="68" y="186" width="324" height="10" rx="5" fill="#E6F1F6"/><rect x="68" y="186" width="190" height="10" rx="5" fill="#1D6E8C"/>
+        <rect x="68" y="212" width="220" height="8" rx="4" fill="#CFE3EC"/><rect x="68" y="232" width="180" height="8" rx="4" fill="#CFE3EC"/>
+        <circle cx="110" cy="300" r="22" fill="#0F2A3A"/><path d="M70 360c0-26 18-40 40-40s40 14 40 40z" fill="#0F2A3A"/>
+        <circle cx="230" cy="296" r="24" fill="#1D6E8C"/><path d="M186 360c0-28 20-44 44-44s44 16 44 44z" fill="#1D6E8C"/>
+        <circle cx="350" cy="300" r="22" fill="#CFE3EC"/><path d="M310 360c0-26 18-40 40-40s40 14 40 40z" fill="#CFE3EC"/>
+      </svg>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <section class="closing" aria-labelledby="c-title">
+      <h2 id="c-title">Be ready before the next alert arrives.</h2>
+      <p>Create an account to open the incident console, or explore it first with a sample ransomware incident.</p>
+      <div class="actions" style="justify-content:center">
+        <button class="btn btn-solid" type="button" data-auth="signup">Create account</button>
+        <button class="btn btn-line" type="button" data-demo>Try the demo console</button>
+      </div>
+    </section>
+    <footer class="foot">
+      <span>VeriTrace, built for Microsoft Innovate 2026 at Bennett University</span>
+      <span>Prototype with sample data. Not legal advice.</span>
+    </footer>
+  </div>
+</div>
+
+<div id="view-console" class="app" hidden>
+  <div class="topbar">
+    <div class="wrap">
+      <a class="brand" href="#/console"><svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="14" r="10.5" fill="none" stroke="#0F2A3A" stroke-width="2.2"/><path d="M13 14V8" stroke="#1D6E8C" stroke-width="2.2" stroke-linecap="round"/><path d="M10 2h6" stroke="#0F2A3A" stroke-width="2.2" stroke-linecap="round"/></svg>VeriTrace</a>
+      <div class="user">
+        <div class="avatar" id="u-avatar" aria-hidden="true">A</div>
+        <div class="who"><span id="u-name"></span><small id="u-org"></small></div>
+        <button class="btn btn-line btn-sm" type="button" id="signout">Sign out</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="wrap console">
+    <div class="welcome">
+      <div>
+        <h1 id="greet">Good afternoon</h1>
+        <p>Here is where your active incident stands. Clocks update every second.</p>
+      </div>
+      <button class="btn btn-solid btn-sm" type="button" id="open-log">Log a new incident</button>
+    </div>
+
+    <!-- Console Tabs Navigation -->
+    <nav class="console-nav" aria-label="Console Navigation">
+      <div class="c-tabs" role="tablist">
+        <button class="c-tab active" type="button" data-ctab="incident" role="tab" aria-selected="true">Incident Command</button>
+        <button class="c-tab" type="button" data-ctab="threat" role="tab" aria-selected="false">AI Threat Analysis</button>
+        <button class="c-tab" type="button" data-ctab="metrics" role="tab" aria-selected="false">ML Model Performance</button>
+      </div>
+      <div class="ml-status-badge" id="ml-status-pill">
+        <span class="dot off"></span> Connecting to ML Backend...
+      </div>
+    </nav>
+
+    <!-- Tab 1: Incident Command Console (Original Features Preserved) -->
+    <div id="tab-view-incident">
+      <section class="card incident" aria-labelledby="inc-title">
+        <svg class="ill" viewBox="0 0 76 76" aria-hidden="true"><rect width="76" height="76" rx="20" fill="#FCEDEC"/><path d="M38 18l22 38H16z" fill="none" stroke="#B8322C" stroke-width="4" stroke-linejoin="round"/><path d="M38 34v10" stroke="#B8322C" stroke-width="4" stroke-linecap="round"/><circle cx="38" cy="50" r="2.6" fill="#B8322C"/></svg>
+        <div>
+          <div class="inc-meta" id="inc-meta"></div>
+          <h2 class="inc-title" id="inc-title"></h2>
+          <div class="pills" id="inc-pills"></div>
+        </div>
+        <div class="inc-actions">
+          <button class="btn btn-solid btn-sm" type="button" id="open-report">Draft report</button>
+        </div>
+      </section>
+
+      <section aria-labelledby="clk-title">
+        <h2 id="clk-title" class="vh">Regulatory notification clocks</h2>
+        <div class="clocks" id="clocks"></div>
+      </section>
+
+      <div class="cols">
+        <section class="card" aria-labelledby="plan-title">
+          <div class="card-h">
+            <h2 id="plan-title">Response plan</h2>
+            <p>Steps for each NIST SP 800-61 phase. Ticking a step records your approval in the evidence log.</p>
+          </div>
+          <div class="phases" role="tablist" id="phases" aria-label="NIST phases"></div>
+          <div class="card-b"><ul class="steps" id="steps"></ul></div>
+        </section>
+
+        <div class="stack">
+          <section class="card" aria-labelledby="trg-title">
+            <div class="card-h">
+              <h2 id="trg-title">Notification triggers</h2>
+              <p>Decided by fixed rules, not by the AI, so each one can be explained.</p>
+            </div>
+            <div class="card-b"><ul class="trig" id="triggers"></ul></div>
+          </section>
+
+          <section class="card" aria-labelledby="ev-title">
+            <div class="card-h">
+              <h2 id="ev-title">Evidence timeline</h2>
+              <p>Chain of custody. Each entry carries the hash of the one before it.</p>
+            </div>
+            <div class="card-b">
+              <div class="chain-status" id="chain-status"><span id="chain-text">Checking chain…</span><button class="btn btn-line btn-xs" type="button" id="verify">Verify chain</button></div>
+              <ol class="log" id="log"></ol>
+              <form class="add-ev" id="ev-form">
+                <input type="text" id="ev-note" placeholder="Describe evidence or an action taken" aria-label="Evidence description">
+                <button class="btn btn-solid btn-sm" type="submit">Add to log</button>
+                <label class="file-row">Attach a file to hash it: <input type="file" id="ev-file"></label>
+              </form>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: AI Threat Analysis Section -->
+    <div id="tab-view-threat" hidden>
+      <section class="card" style="margin-bottom:20px;">
+        <div class="card-h">
+          <h2>AI Network Threat Analysis</h2>
+          <p>Real-time network traffic flow classifier powered by the trained UNSW-NB15 Random Forest model. Evaluates 42 flow attributes to determine whether traffic is benign or malicious across 10 attack families.</p>
+        </div>
+        <div class="card-b">
+          <div class="presets-bar">
+            <span class="presets-label">Real UNSW-NB15 flow presets:</span>
+            <button class="btn-preset" type="button" data-preset="exploit">Exploits (HTTP Probe)</button>
+            <button class="btn-preset" type="button" data-preset="generic">Generic (Payload Injection)</button>
+            <button class="btn-preset" type="button" data-preset="fuzzers">Fuzzers (Buffer Overflow)</button>
+            <button class="btn-preset" type="button" data-preset="recon">Reconnaissance (Scan)</button>
+            <button class="btn-preset" type="button" data-preset="normal">Normal (Benign Traffic)</button>
+          </div>
+
+          <form id="threat-form" novalidate>
+            <div class="feature-form-grid">
+              <div class="field">
+                <label for="tf-dur">Duration (sec)</label>
+                <input id="tf-dur" type="number" step="any" value="0.5" required>
+              </div>
+              <div class="field">
+                <label for="tf-proto">Protocol</label>
+                <select id="tf-proto">
+                  <option value="tcp" selected>tcp</option>
+                  <option value="udp">udp</option>
+                  <option value="arp">arp</option>
+                  <option value="icmp">icmp</option>
+                  <option value="ospf">ospf</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="tf-service">Service</label>
+                <select id="tf-service">
+                  <option value="http" selected>http</option>
+                  <option value="-">- (none)</option>
+                  <option value="ftp">ftp</option>
+                  <option value="smtp">smtp</option>
+                  <option value="dns">dns</option>
+                  <option value="ssh">ssh</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="tf-state">State</label>
+                <select id="tf-state">
+                  <option value="FIN" selected>FIN</option>
+                  <option value="CON">CON</option>
+                  <option value="INT">INT</option>
+                  <option value="REQ">REQ</option>
+                  <option value="RST">RST</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="tf-spkts">Source Packets (spkts)</label>
+                <input id="tf-spkts" type="number" value="10" required>
+              </div>
+              <div class="field">
+                <label for="tf-dpkts">Dest Packets (dpkts)</label>
+                <input id="tf-dpkts" type="number" value="8" required>
+              </div>
+              <div class="field">
+                <label for="tf-sbytes">Source Bytes (sbytes)</label>
+                <input id="tf-sbytes" type="number" value="700" required>
+              </div>
+              <div class="field">
+                <label for="tf-dbytes">Dest Bytes (dbytes)</label>
+                <input id="tf-dbytes" type="number" value="1200" required>
+              </div>
+              <div class="field">
+                <label for="tf-rate">Packet Rate (pkts/s)</label>
+                <input id="tf-rate" type="number" step="any" value="35.0" required>
+              </div>
+              <div class="field">
+                <label for="tf-sttl">Source TTL (sttl)</label>
+                <input id="tf-sttl" type="number" value="62" required>
+              </div>
+              <div class="field">
+                <label for="tf-dttl">Dest TTL (dttl)</label>
+                <input id="tf-dttl" type="number" value="252" required>
+              </div>
+              <div class="field">
+                <label for="tf-sload">Source Load (bps)</label>
+                <input id="tf-sload" type="number" step="any" value="9500.0" required>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:8px;">
+              <button class="btn btn-solid btn-sm" type="submit" id="btn-run-predict">Classify Flow with ML Model</button>
+              <button class="btn btn-line btn-sm" type="button" id="btn-reset-threat">Reset Fields</button>
+              <span id="threat-spinner" style="font-size:13px; color:var(--muted); display:none;">Analyzing flow features...</span>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Prediction Result Container -->
+      <section class="pred-card" id="pred-result-card" style="display:none;">
+        <div class="pred-head">
+          <div>
+            <span class="inc-meta" id="pred-meta-time">INFERENCE TIME: 0 ms</span>
+            <h3 class="pred-title" id="pred-cat-name">Exploits</h3>
+            <div class="pills" id="pred-pill-badges"></div>
+          </div>
+          <div>
+            <button class="btn btn-line btn-sm" type="button" id="btn-attach-evidence">Attach Analysis to Evidence Log</button>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:20px;">
+          <div class="card" style="padding:16px 20px;">
+            <div style="font-size:12px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.04em;">Assigned Security Severity</div>
+            <div style="font-size:22px; font-weight:600; margin:6px 0 2px;" id="pred-sev-text">Critical</div>
+            <div style="font-size:12px; color:var(--muted);">Post-processing mapping based on threat category impact.</div>
+          </div>
+          <div class="card" style="padding:16px 20px;">
+            <div style="font-size:12px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.04em;">Mapped MITRE ATT&amp;CK Technique</div>
+            <div style="font-size:16px; font-weight:600; margin:6px 0 2px; color:var(--tide-deep);" id="pred-mitre-text">T1190: Exploit Public-Facing Application</div>
+            <div style="font-size:12px; color:var(--muted);">Post-processing knowledge base correlation.</div>
+          </div>
+        </div>
+
+        <div class="card-h" style="padding:0; margin-bottom:10px;">
+          <h4 style="font-size:15px; margin:0; font-weight:600;">Class Probabilities (10 UNSW-NB15 Categories)</h4>
+        </div>
+        <div class="prob-list" id="pred-prob-list"></div>
+
+        <div class="alert-callout" style="margin-top:22px; margin-bottom:0;">
+          <b>Scope &amp; Data Boundary:</b> The underlying UNSW-NB15 model classifies network packet flow telemetry (e.g. CVE Exploits, DoS traffic, Fuzzers, Port Scans). It operates at the network protocol/flow layer and does not directly inspect endpoint file systems or prove host-level ransomware encryption.
+        </div>
+      </section>
+    </div>
+
+    <!-- Tab 3: ML Performance Dashboard Section -->
+    <div id="tab-view-metrics" hidden>
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-h" style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;">
+          <div>
+            <h2>ML Model Performance Dashboard</h2>
+            <p>Measured on the unseen 20% test partition (35,069 records) of the official UNSW-NB15 cybersecurity dataset using scikit-learn.</p>
+          </div>
+          <button class="btn btn-line btn-xs" type="button" id="btn-fetch-metrics">Refresh Metrics</button>
+        </div>
+        <div class="card-b">
+          <div class="metric-grid">
+            <div class="metric-card">
+              <div class="label">Overall Accuracy</div>
+              <div class="val" id="val-acc">82.87%</div>
+              <div class="sub">35,069 holdout test records</div>
+            </div>
+            <div class="metric-card">
+              <div class="label">Weighted F1-Score</div>
+              <div class="val" id="val-f1w">81.24%</div>
+              <div class="sub">Reflects real traffic distribution</div>
+            </div>
+            <div class="metric-card">
+              <div class="label">Weighted Precision</div>
+              <div class="val" id="val-pw">82.36%</div>
+              <div class="sub">Low overall false alarm rate</div>
+            </div>
+            <div class="metric-card">
+              <div class="label">Weighted Recall</div>
+              <div class="val" id="val-rw">82.87%</div>
+              <div class="sub">High attack detection rate</div>
+            </div>
+            <div class="metric-card">
+              <div class="label">Macro F1-Score</div>
+              <div class="val" id="val-f1m">56.63%</div>
+              <div class="sub">Unweighted arithmetic mean</div>
+            </div>
+            <div class="metric-card">
+              <div class="label">Macro Precision</div>
+              <div class="val" id="val-pm">73.82%</div>
+              <div class="sub">Across all 10 attack classes</div>
+            </div>
+            <div class="metric-card">
+              <div class="label">Macro Recall</div>
+              <div class="val" id="val-rm">54.37%</div>
+              <div class="sub">Affected by minority classes</div>
+            </div>
+            <div class="metric-card">
+              <div class="label">Model Architecture</div>
+              <div class="val" style="font-size:24px; padding-top:4px;">RandomForest</div>
+              <div class="sub">100 trees, 42 features pipeline</div>
+            </div>
+          </div>
+
+          <div class="alert-callout">
+            <b>Class Imbalance &amp; Evaluation Insights:</b> In the official UNSW-NB15 dataset, major classes like <b>Normal</b> (56,000), <b>Generic</b> (40,000), and <b>Exploits</b> (33,393) make up over 73% of total records and achieve <b>73% to 99% F1-scores</b>. In contrast, rare attack types like <b>Worms</b> (only 130 total samples in 175k rows) and <b>Backdoor</b> (1,746 samples) have high precision but lower recall, which naturally pulls down the unweighted macro average.
+          </div>
+
+          <div class="card-h" style="padding:0; margin:24px 0 10px;">
+            <h3 style="font-size:17px; margin:0; font-weight:600;">Per-Class Classification Report</h3>
+          </div>
+          <div class="tw" style="overflow-x:auto;">
+            <table class="report table" id="table-per-class" style="width:100%; border-collapse:collapse; font-size:13.5px;">
+              <thead>
+                <tr style="border-bottom:2px solid var(--line); text-align:left;">
+                  <th style="padding:8px 10px;">Attack Category</th>
+                  <th style="padding:8px 10px;">Precision</th>
+                  <th style="padding:8px 10px;">Recall</th>
+                  <th style="padding:8px 10px;">F1-Score</th>
+                  <th style="padding:8px 10px;">Holdout Test Support</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-per-class">
+                <!-- Dynamically populated from /api/ml/metrics -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card-h" style="padding:0; margin:28px 0 10px;">
+            <h3 style="font-size:17px; margin:0; font-weight:600;">Confusion Matrix (10 &times; 10 Classes)</h3>
+            <p style="margin:2px 0 12px; font-size:13px; color:var(--muted);">Rows represent True Ground-Truth Categories; Columns represent Model Predictions.</p>
+          </div>
+          <div class="matrix-wrap" id="matrix-container">
+            <!-- Dynamically populated from /api/ml/metrics -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<dialog id="auth" aria-labelledby="auth-title">
+  <div class="dlg">
+    <button class="close" type="button" aria-label="Close" data-close>&times;</button>
+    <div id="signin-view">
+      <h2 id="auth-title">Sign in</h2>
+      <p class="sub" id="signin-sub">Open your incident console.</p>
+      <form id="signin-form" novalidate>
+        <div class="form-err" id="signin-err" role="alert"></div>
+        <div class="field"><label for="si-email">Work email</label><input id="si-email" type="email" autocomplete="email" required><span class="err" id="si-email-err"></span></div>
+        <div class="field"><label for="si-pass">Password</label><input id="si-pass" type="password" autocomplete="current-password" required><span class="err" id="si-pass-err"></span></div>
+        <button class="btn btn-solid full" type="submit">Sign in</button>
+      </form>
+      <div class="divider">or</div>
+      <button class="btn btn-line full" type="button" data-demo>Use the demo account</button>
+      <p class="switch">New to VeriTrace? <button type="button" data-auth="signup">Create account</button></p>
+    </div>
+    <div id="signup-view" hidden>
+      <h2>Create account</h2>
+      <p class="sub">Set up your VeriTrace workspace in under a minute.</p>
+      <form id="signup-form" novalidate>
+        <div class="form-err" id="signup-err" role="alert"></div>
+        <div class="field"><label for="su-name">Full name</label><input id="su-name" autocomplete="name" required><span class="err" id="su-name-err"></span></div>
+        <div class="field"><label for="su-email">Work email</label><input id="su-email" type="email" autocomplete="email" required><span class="err" id="su-email-err"></span></div>
+        <div class="row2">
+          <div class="field"><label for="su-org">Organization</label><input id="su-org" autocomplete="organization" required><span class="err" id="su-org-err"></span></div>
+          <div class="field"><label for="su-role">Your role</label>
+            <select id="su-role" required><option value="">Choose one</option><option>SOC analyst</option><option>Incident response lead</option><option>CISO or security head</option><option>Compliance or DPO</option><option>Student or researcher</option></select>
+            <span class="err" id="su-role-err"></span></div>
+        </div>
+        <div class="field"><label for="su-pass">Password</label><input id="su-pass" type="password" autocomplete="new-password" required><span class="err" id="su-pass-err"></span></div>
+        <button class="btn btn-solid full" type="submit">Create account</button>
+      </form>
+      <p class="switch">Already have an account? <button type="button" data-auth="signin">Sign in</button></p>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="log-dlg" aria-labelledby="log-title">
+  <div class="dlg">
+    <button class="close" type="button" aria-label="Close" data-close>&times;</button>
+    <h2 id="log-title">Log a new incident</h2>
+    <p class="sub">VeriTrace will build the response plan and start any clocks that apply.</p>
+    <form id="log-form" novalidate>
+      <div class="field"><label for="lg-type">What happened?</label><select id="lg-type"></select></div>
+      <div class="field"><label for="lg-when">When was it discovered?</label><input id="lg-when" type="datetime-local"><span class="err" id="lg-when-err"></span></div>
+      <div class="field"><label for="lg-notes">Notes (optional)</label><textarea id="lg-notes" placeholder="Alert source, affected systems, first observations"></textarea></div>
+      <label class="check"><input type="checkbox" id="lg-pii"> Customer personal data may be involved</label>
+      <label class="check"><input type="checkbox" id="lg-eu"> Includes data of EU residents</label>
+      <button class="btn btn-solid full" type="submit" style="margin-top:8px">Log incident</button>
+    </form>
+  </div>
+</dialog>
+
+<dialog id="report-dlg" class="wide" aria-labelledby="rep-title">
+  <div class="dlg">
+    <button class="close" type="button" aria-label="Close" data-close>&times;</button>
+    <h2 id="rep-title">Incident report draft</h2>
+    <p class="sub">Generated from the live incident record. Review it before sending to any regulator.</p>
+    <div class="report" id="report"></div>
+    <div class="actions" style="margin-top:18px">
+      <button class="btn btn-solid btn-sm" type="button" id="copy-report">Copy report</button>
+      <button class="btn btn-line btn-sm" type="button" data-close>Close</button>
+    </div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+var store={
+  get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
+  set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},
+  del:function(k){try{localStorage.removeItem(k)}catch(e){}}
+};
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function hex(buf){return Array.prototype.map.call(new Uint8Array(buf),function(b){return b.toString(16).padStart(2,'0')}).join('')}
+function sha256(data){
+  var bytes=typeof data==='string'?new TextEncoder().encode(data):data;
+  if(window.crypto&&crypto.subtle) return crypto.subtle.digest('SHA-256',bytes).then(hex);
+  return Promise.resolve('0'.repeat(64));
+}
+function pad(n){return String(n).padStart(2,'0')}
+function hms(sec){var s=Math.abs(sec);return pad(Math.floor(s/3600))+':'+pad(Math.floor(s%3600/60))+':'+pad(s%60)}
+function fmtTime(ms){return new Date(ms).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:false})}
+function utc(ms){return new Date(ms).toISOString().replace('T',' ').slice(0,19)+' UTC'}
+var toastTimer;
+function toast(msg){var t=$('toast');t.textContent=msg;t.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.hidden=true},3200)}
+
+var hDigits=[].slice.call(document.querySelectorAll('.hero .clock .d')), hStart=Date.now();
+function heroTick(){
+  var left=Math.max(0,72*3600-Math.floor((Date.now()-hStart)/1000));
+  var s=pad(Math.floor(left/3600))+pad(Math.floor(left%3600/60))+pad(left%60);
+  for(var i=0;i<6;i++) if(hDigits[i].textContent!==s[i]) hDigits[i].textContent=s[i];
+}
+
+var PHASES=["Preparation","Detection & analysis","Containment, eradication & recovery","Post-incident activity"];
+var COMMON={
+  0:[["Confirm the incident commander and open a bridge call","Bank IR playbook §1",""],
+     ["Check the regulator contact list and report templates are current","NIST SP 800-61 §3.1",""]],
+  3:[["Hold a lessons-learned review within two weeks","NIST SP 800-61 §3.4",""],
+     ["Update detection rules and the playbook with what was learned","NIST SP 800-61 §3.4",""],
+     ["Archive the evidence log and final report with its chain hash","Bank records policy",""]]
+};
+var SCEN={
+  ransomware:{label:"Ransomware on a branch file server",short:"Ransomware",pii:true,eu:true,
+    attack:[["T1486","Data Encrypted for Impact"],["T1490","Inhibit System Recovery"],["T1021.002","SMB/Windows Admin Shares"]],
+    steps:{1:[["Identify encrypted hosts and the ransom note variant","NIST SP 800-61 §3.2","T1486"],
+              ["Check whether backups and shadow copies were deleted","CISA ransomware guide","T1490"],
+              ["Scope lateral movement over admin shares","ATT&CK T1021.002","T1021.002"],
+              ["Decide whether customer KYC data was accessed","DPDP and GDPR assessment",""]],
+           2:[["Isolate affected hosts from the branch network","NIST SP 800-61 §3.3","T1486"],
+              ["Disable compromised service accounts","Bank IR playbook §4","T1021.002"],
+              ["Restore from clean, offline backups","CISA ransomware guide","T1490"],
+              ["Monitor for re-encryption for 72 hours","NIST SP 800-61 §3.3",""]]}},
+  phishing:{label:"Phishing led to account takeover",short:"Phishing and account takeover",pii:true,eu:false,
+    attack:[["T1566.002","Spearphishing Link"],["T1078","Valid Accounts"]],
+    steps:{1:[["Pull the phishing email and list all recipients","NIST SP 800-61 §3.2","T1566.002"],
+              ["Review sign-in logs for the taken-over accounts","ATT&CK T1078","T1078"],
+              ["Check which customer records those accounts opened","DPDP and GDPR assessment",""]],
+           2:[["Block the sender domain and the phishing URL","Bank IR playbook §3","T1566.002"],
+              ["Reset credentials and revoke active sessions","NIST SP 800-61 §3.3","T1078"],
+              ["Enforce MFA on the affected accounts","Bank IR playbook §3","T1078"]]}},
+  carddata:{label:"Card data exfiltration from a payment server",short:"Card data exfiltration",pii:true,eu:true,
+    attack:[["T1005","Data from Local System"],["T1041","Exfiltration Over C2 Channel"]],
+    steps:{1:[["Identify which card records were stored on the server","ATT&CK T1005","T1005"],
+              ["Trace outbound traffic to the command-and-control host","ATT&CK T1041","T1041"],
+              ["Engage a PCI forensic investigator","PCI DSS incident guidance",""]],
+           2:[["Block the C2 domain and IP addresses at the perimeter","NIST SP 800-61 §3.3","T1041"],
+              ["Rebuild the payment server from a trusted image","NIST SP 800-61 §3.3","T1005"],
+              ["Coordinate card reissue with the card networks","Bank IR playbook §6",""]]}},
+  insider:{label:"Insider leak of customer KYC data",short:"Insider data leak",pii:true,eu:false,
+    attack:[["T1567.002","Exfiltration to Cloud Storage"],["T1078","Valid Accounts"]],
+    steps:{1:[["Review DLP alerts and uploads to personal cloud storage","ATT&CK T1567.002","T1567.002"],
+              ["List the KYC records the employee accessed","DPDP assessment","T1078"],
+              ["Preserve the employee's laptop and mailbox","NIST SP 800-61 §3.2",""]],
+           2:[["Suspend the employee's access","Bank HR and IR policy","T1078"],
+              ["Request takedown of the uploaded files","Bank legal playbook","T1567.002"],
+              ["Brief HR and legal on next steps","Bank IR playbook §7",""]]}},
+  ddos:{label:"DDoS attack on net banking",short:"DDoS on net banking",pii:false,eu:false,
+    attack:[["T1498","Network Denial of Service"],["T1499","Endpoint Denial of Service"]],
+    steps:{1:[["Confirm attack traffic volume and source regions","ATT&CK T1498","T1498"],
+              ["Check whether the outage hid another intrusion","NIST SP 800-61 §3.2",""]],
+           2:[["Enable upstream scrubbing with the ISP or CDN","Bank IR playbook §5","T1498"],
+              ["Rate-limit the login and payment endpoints","ATT&CK T1499","T1499"],
+              ["Post a customer notice on channel availability","Bank comms playbook",""]]}}
+};
+var REGS=[
+  {id:"certin",name:"CERT-In",hours:6,rule:"Directions, April 2022",to:"CERT-In",short:"CERT-In",
+   applies:function(){return true},why:"Reportable cyber incident at a bank"},
+  {id:"rbi",name:"RBI",hours:6,rule:"Cyber security framework",to:"RBI Department of Supervision",short:"RBI",
+   applies:function(){return true},why:"Cyber incident at a regulated bank"},
+  {id:"gdpr",name:"GDPR",hours:72,rule:"Article 33",to:"Lead EU supervisory authority",short:"EU authority",
+   applies:function(i){return i.pii&&i.eu},why:"Personal data of EU residents involved",whyNot:"No EU residents' personal data recorded"},
+  {id:"dpdp",name:"DPDP",hours:72,rule:"Rules 2025, Rule 7",to:"Data Protection Board of India",short:"Data Protection Board",
+   applies:function(i){return i.pii},why:"Personal data of customers involved",whyNot:"No personal data recorded"}
+];
+
+function buildSteps(key){
+  var s=SCEN[key], out=[];
+  [0,1,2,3].forEach(function(p){
+    var list=(p===0||p===3)?COMMON[p]:s.steps[p];
+    list.forEach(function(x,i){out.push({id:'p'+p+'s'+i,phase:p,text:x[0],src:x[1],atk:x[2],done:false,by:null})});
+  });
+  return out;
+}
+
+var session=store.get('vt-session',null);
+var inc=null, chainOK=null;
+function greeting(){var h=new Date().getHours();return h<12?'Good morning':h<17?'Good afternoon':'Good evening'}
+
+function newIncident(key,discovered,pii,eu,notes){
+  var n=store.get('vt-seq',146)+1; store.set('vt-seq',n);
+  var steps=buildSteps(key);
+  steps.forEach(function(st){ if(st.phase===0){st.done=true;st.by='Pre-approved playbook'} });
+  inc={id:'INC-2026-'+String(n).padStart(4,'0'),key:key,title:SCEN[key].label,discovered:discovered,pii:pii,eu:eu,notes:notes||'',steps:steps,filed:{},log:[],viewPhase:1};
+  return inc;
+}
+function saveInc(){ if(inc) store.set('vt-incident',inc); }
+
+var chainQueue=Promise.resolve();
+function entryString(e){return e.prev+'|'+e.ts+'|'+e.actor+'|'+e.action+'|'+e.extra}
+function appendLog(action,actor,extra){
+  var target=inc;
+  chainQueue=chainQueue.then(function(){
+    var prev=target.log.length?target.log[target.log.length-1].hash:'0'.repeat(64);
+    var e={ts:Date.now(),actor:actor,action:action,extra:extra||'',prev:prev};
+    return sha256(entryString(e)).then(function(h){
+      e.hash=h; target.log.push(e);
+      if(target===inc){ saveInc(); renderLog(); verifyChain(true); }
+    });
+  });
+  return chainQueue;
+}
+function verifyChain(silent){
+  if(!inc) return Promise.resolve();
+  var prev='0'.repeat(64), ok=true, p=Promise.resolve();
+  inc.log.forEach(function(e){
+    p=p.then(function(){
+      if(e.prev!==prev) ok=false;
+      return sha256(entryString(e)).then(function(h){ if(h!==e.hash) ok=false; prev=e.hash; });
+    });
+  });
+  return p.then(function(){
+    chainOK=ok;
+    $('chain-status').classList.toggle('bad',!ok);
+    $('chain-text').textContent=ok?('Chain intact, '+inc.log.length+' entries verified'):'Chain broken. An entry was changed after it was recorded.';
+    if(!silent) toast(ok?'Chain verified':'Chain verification failed');
+  });
+}
+
+function route(){
+  var h=location.hash||'#/';
+  if(h.indexOf('#/console')===0){
+    if(!session){ location.replace('#/'); openAuth('signin','Sign in to open the incident console.'); return; }
+    showConsole();
+  } else {
+    $('view-console').hidden=true; $('view-landing').hidden=false;
+    document.title='VeriTrace — The clock is running';
+  }
+}
+window.addEventListener('hashchange',route);
+
+function signInAs(user,msg){
+  session=user; store.set('vt-session',user);
+  if($('auth').open) $('auth').close();
+  if(location.hash==='#/console') route(); else location.hash='#/console';
+  if(msg) setTimeout(function(){toast(msg)},200);
+}
+
+var authDlg=$('auth');
+function openAuth(which,sub){
+  $('signin-view').hidden=which!=='signin'; $('signup-view').hidden=which!=='signup';
+  $('signin-sub').textContent=sub||'Open your incident console.';
+  if(!authDlg.open) authDlg.showModal();
+  setTimeout(function(){ (which==='signin'?$('si-email'):$('su-name')).focus(); },40);
+}
+document.querySelectorAll('[data-auth]').forEach(function(b){b.addEventListener('click',function(){openAuth(b.dataset.auth)})});
+document.querySelectorAll('dialog').forEach(function(d){
+  d.addEventListener('click',function(e){if(e.target===d) d.close()});
+  d.querySelectorAll('[data-close]').forEach(function(b){b.addEventListener('click',function(){d.close()})});
+});
+var DEMO={name:'Akshat Saxena',email:'demo@veritrace.app',org:'Demo Bank',role:'Incident response lead'};
+document.querySelectorAll('[data-demo]').forEach(function(b){b.addEventListener('click',function(){signInAs(DEMO,'Signed in with the demo account')})});
+
+function setErr(id,msg){var el=$(id);el.setAttribute('aria-invalid',msg?'true':'false');$(id+'-err').textContent=msg;return !msg}
+var emailRe=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+$('signin-form').addEventListener('submit',function(e){
+  e.preventDefault(); $('signin-err').textContent='';
+  var em=$('si-email').value.trim().toLowerCase(), pw=$('si-pass').value;
+  var okE=setErr('si-email',emailRe.test(em)?'':'Enter your work email, like name@bank.com.');
+  var okP=setErr('si-pass',pw?'':'Enter your password.');
+  if(!okE||!okP){ (okE?$('si-pass'):$('si-email')).focus(); return; }
+  var acc=store.get('vt-accounts',{})[em];
+  if(!acc){ $('signin-err').textContent='No account uses this email. Create an account, or use the demo account.'; return; }
+  sha256(pw+'|'+em).then(function(h){
+    if(h!==acc.pw){ $('signin-err').textContent='That password is incorrect. Check it and try again.'; $('si-pass').focus(); return; }
+    $('signin-form').reset();
+    signInAs({name:acc.name,email:em,org:acc.org,role:acc.role},'Signed in');
+  });
+});
+
+$('signup-form').addEventListener('submit',function(e){
+  e.preventDefault(); $('signup-err').textContent='';
+  var v={name:$('su-name').value.trim(),email:$('su-email').value.trim().toLowerCase(),org:$('su-org').value.trim(),role:$('su-role').value,pw:$('su-pass').value};
+  var checks=[['su-name',v.name.length>1?'':'Enter your full name.'],['su-email',emailRe.test(v.email)?'':'Enter a work email, like name@bank.com.'],
+    ['su-org',v.org?'':'Enter your organization.'],['su-role',v.role?'':'Choose your role.'],['su-pass',v.pw.length>=8?'':'Use at least 8 characters.']], first=null;
+  checks.forEach(function(c){ if(!setErr(c[0],c[1])&&!first) first=c[0]; });
+  if(first){ $(first).focus(); return; }
+  var accounts=store.get('vt-accounts',{});
+  if(accounts[v.email]){ $('signup-err').textContent='An account already uses this email. Sign in instead.'; return; }
+  sha256(v.pw+'|'+v.email).then(function(h){
+    accounts[v.email]={name:v.name,org:v.org,role:v.role,pw:h}; store.set('vt-accounts',accounts);
+    $('signup-form').reset();
+    signInAs({name:v.name,email:v.email,org:v.org,role:v.role},'Account created');
+  });
+});
+['si-email','si-pass','su-name','su-email','su-org','su-role','su-pass'].forEach(function(id){
+  $(id).addEventListener('input',function(){ if($(id).getAttribute('aria-invalid')==='true'){ $(id).setAttribute('aria-invalid','false'); $(id+'-err').textContent=''; } });
+});
+
+$('signout').addEventListener('click',function(){ session=null; store.del('vt-session'); location.hash='#/'; window.scrollTo(0,0); toast('Signed out'); });
+
+function showConsole(){
+  $('view-landing').hidden=true; $('view-console').hidden=false; window.scrollTo(0,0);
+  document.title='Incident console — VeriTrace';
+  $('u-name').textContent=session.name; $('u-org').textContent=session.role+', '+session.org;
+  $('u-avatar').textContent=session.name.split(/\s+/).map(function(w){return w[0]}).slice(0,2).join('').toUpperCase();
+  $('greet').textContent=greeting()+', '+session.name.split(' ')[0];
+  if(!inc){
+    inc=store.get('vt-incident',null);
+    if(!inc){
+      newIncident('ransomware',Date.now()-47*60*1000,true,true,'EDR alert on file server FS-BR-07 at the Saket branch.');
+      appendLog('Incident logged: '+inc.title,'EDR alert, triaged by '+session.name,'Discovered '+utc(inc.discovered));
+      appendLog('Disk image of FS-BR-07 collected','Megha Singhal','Image hash recorded by the forensic tool');
+    }
+  }
+  renderAll(); verifyChain(true); checkMLStatus();
+}
+function renderAll(){ renderHeader(); renderClocks(); renderPhases(); renderSteps(); renderTriggers(); renderLog(); }
+function currentPhase(){ for(var p=0;p<4;p++){ if(inc.steps.some(function(s){return s.phase===p&&!s.done})) return p; } return 3; }
+
+function renderHeader(){
+  $('inc-meta').textContent=inc.id+'  |  Discovered '+fmtTime(inc.discovered)+'  |  Owner '+session.name;
+  $('inc-title').textContent=inc.title;
+  var s=SCEN[inc.key], cp=currentPhase();
+  var pills='<span class="pill crit">Critical</span><span class="pill phase">Phase '+(cp+1)+' of 4: '+esc(PHASES[cp])+'</span>';
+  s.attack.forEach(function(a){pills+='<span class="pill">'+esc(a[0]+' '+a[1])+'</span>'});
+  pills+='<span class="pill">'+(inc.pii?'Personal data involved':'No personal data')+'</span>';
+  $('inc-pills').innerHTML=pills;
+}
+
+function renderClocks(){
+  var now=Date.now(), html='';
+  REGS.forEach(function(r){
+    var on=r.applies(inc), filed=inc.filed[r.id], total=r.hours*3600, due=inc.discovered+total*1000;
+    var left=Math.round((due-(filed||now))/1000), cls, state, time, dueTxt, pct;
+    if(!on){cls='off';state='<span class="state off">Not triggered</span>';time='--:--:--';dueTxt=r.whyNot;pct=0}
+    else if(filed){cls='done';state='<span class="state done">Notified</span>';time=hms(Math.max(0,left));dueTxt='Filed '+fmtTime(filed)+(left<0?', late':', on time');pct=100}
+    else if(left<0){cls='late';state='<span class="state late">Overdue</span>';time='-'+hms(left);dueTxt='Was due '+fmtTime(due);pct=100}
+    else if(left<3600){cls='soon';state='<span class="state soon">Due soon</span>';time=hms(left);dueTxt='Due '+fmtTime(due);pct=(1-left/total)*100}
+    else {cls='run';state='<span class="state run">Running</span>';time=hms(left);dueTxt='Due '+fmtTime(due);pct=(1-left/total)*100}
+    html+='<article class="card rclock '+cls+'" aria-label="'+esc(r.name)+' clock"><div class="name"><span>'+esc(r.name)+', '+r.hours+' h</span>'+state+'</div>'+
+      '<div class="rule">'+esc(r.rule)+'</div><div class="time">'+time+'</div><div class="due">'+esc(dueTxt)+'</div>'+
+      '<div class="bar"><i style="width:'+pct.toFixed(1)+'%"></i></div><div class="foot2"><span>'+esc(on?'To '+r.short:'')+'</span>'+
+      (on&&!filed?'<button class="btn btn-line btn-xs" type="button" data-file="'+r.id+'">Mark notified</button>':'')+'</div></article>';
+  });
+  $('clocks').innerHTML=html;
+}
+$('clocks').addEventListener('click',function(e){
+  var b=e.target.closest('[data-file]'); if(!b) return;
+  var r=REGS.filter(function(x){return x.id===b.dataset.file})[0];
+  inc.filed[r.id]=Date.now(); saveInc(); renderClocks(); renderTriggers();
+  appendLog(r.name+' notification filed with '+r.to,session.name,'');
+  toast(r.name+' marked as notified');
+});
+
+function renderPhases(){
+  var cur=currentPhase(), html='';
+  PHASES.forEach(function(p,i){
+    var st=inc.steps.filter(function(s){return s.phase===i}), d=st.filter(function(s){return s.done}).length;
+    html+='<button class="ph'+(d===st.length?' complete':'')+'" role="tab" type="button" data-ph="'+i+'" aria-selected="'+(inc.viewPhase===i)+'">'+
+      '<small>Phase '+(i+1)+(i===cur?', current':'')+'</small><b>'+esc(p)+'</b><div class="pbar"><i style="width:'+(st.length?d/st.length*100:0)+'%"></i></div></button>';
+  });
+  $('phases').innerHTML=html;
+}
+$('phases').addEventListener('click',function(e){
+  var b=e.target.closest('[data-ph]'); if(!b) return;
+  inc.viewPhase=+b.dataset.ph; saveInc(); renderPhases(); renderSteps();
+});
+
+function renderSteps(){
+  var html='';
+  inc.steps.filter(function(s){return s.phase===inc.viewPhase}).forEach(function(s){
+    var nm=SCEN[inc.key].attack.filter(function(a){return a[0]===s.atk})[0];
+    html+='<li class="step'+(s.done?' is-done':'')+'"><input type="checkbox" id="'+s.id+'"'+(s.done?' checked':'')+'>'+
+      '<div><label for="'+s.id+'">'+esc(s.text)+'</label><div class="meta">'+
+      (s.atk?'<span class="atk">ATT&amp;CK '+esc(s.atk)+(nm?' '+esc(nm[1]):'')+'</span>':'')+
+      '<span class="src">Source: '+esc(s.src)+'</span>'+(s.done&&s.by?'<span class="who-did">Approved by '+esc(s.by)+'</span>':'')+'</div></div></li>';
+  });
+  $('steps').innerHTML=html;
+}
+$('steps').addEventListener('change',function(e){
+  var s=inc.steps.filter(function(x){return x.id===e.target.id})[0]; if(!s) return;
+  var before=currentPhase();
+  s.done=e.target.checked; s.by=s.done?session.name:null; saveInc();
+  appendLog((s.done?'Step approved: ':'Step reopened: ')+s.text,session.name,s.atk?'ATT&CK '+s.atk:'');
+  renderSteps(); renderPhases(); renderHeader();
+  var after=currentPhase(); if(after!==before) toast('Now in phase '+(after+1)+': '+PHASES[after]);
+});
+
+function renderTriggers(){
+  var html='';
+  REGS.forEach(function(r){
+    var on=r.applies(inc), f=inc.filed[r.id];
+    html+='<li><span class="dot'+(on?(f?' ok':''):' off')+'"></span><div><b>'+esc(r.name)+(on?(f?', notified':', notify within '+r.hours+' h'):', not triggered')+'</b>'+
+      '<span>'+esc(on?r.why+'. Send to '+r.to+'.':r.whyNot+'.')+'</span></div></li>';
+  });
+  $('triggers').innerHTML=html;
+}
+
+function renderLog(){
+  var html='';
+  inc.log.slice().reverse().forEach(function(e){
+    html+='<li><div class="t">'+utc(e.ts)+', '+esc(e.actor)+'</div><div class="a">'+esc(e.action)+'</div>'+
+      (e.extra?'<div class="t">'+esc(e.extra)+'</div>':'')+'<code>hash '+e.hash.slice(0,16)+'…  prev '+e.prev.slice(0,16)+'…</code></li>';
+  });
+  $('log').innerHTML=html;
+}
+$('verify').addEventListener('click',function(){verifyChain(false)});
+
+$('ev-form').addEventListener('submit',function(e){
+  e.preventDefault();
+  var note=$('ev-note').value.trim(), f=$('ev-file').files[0];
+  if(!note&&!f){ toast('Describe the evidence or attach a file first'); $('ev-note').focus(); return; }
+  var done=function(extra){ appendLog(note||('File collected: '+f.name),session.name,extra); $('ev-form').reset(); toast('Added to the evidence log'); };
+  if(f){ f.arrayBuffer().then(sha256).then(function(h){ done(f.name+', '+Math.max(1,Math.round(f.size/1024))+' KB, sha256 '+h); }); } else done('');
+});
+
+var sel=$('lg-type');
+Object.keys(SCEN).forEach(function(k){var o=document.createElement('option');o.value=k;o.textContent=SCEN[k].label;sel.appendChild(o)});
+function syncScenario(){var s=SCEN[sel.value];$('lg-pii').checked=s.pii;$('lg-eu').checked=s.eu}
+sel.addEventListener('change',syncScenario);
+function localInput(ms){var d=new Date(ms);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)}
+$('open-log').addEventListener('click',function(){ $('lg-when').value=localInput(Date.now()); syncScenario(); setErr('lg-when',''); $('log-dlg').showModal(); });
+$('log-form').addEventListener('submit',function(e){
+  e.preventDefault();
+  var raw=$('lg-when').value, when=new Date(raw).getTime();
+  if(!raw||isNaN(when)){ setErr('lg-when','Enter when the incident was discovered.'); return; }
+  if(when>Date.now()+60000){ setErr('lg-when','Discovery time cannot be in the future.'); return; }
+  setErr('lg-when','');
+  newIncident(sel.value,when,$('lg-pii').checked,$('lg-eu').checked,$('lg-notes').value.trim());
+  appendLog('Incident logged: '+inc.title,session.name,'Discovered '+utc(when)+(inc.notes?'. Notes: '+inc.notes:''));
+  $('log-dlg').close(); $('log-form').reset(); saveInc(); renderAll();
+  var n=REGS.filter(function(r){return r.applies(inc)}).length;
+  toast(inc.id+' logged. '+n+' notification clock'+(n===1?'':'s')+' started.');
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+function reportHTML(){
+  var s=SCEN[inc.key], now=Date.now(), done=inc.steps.filter(function(x){return x.done}), cp=currentPhase();
+  var h='<h3>'+esc(inc.id)+': '+esc(inc.title)+'</h3><div style="color:var(--muted);font-size:13px">Prepared '+utc(now)+' by '+esc(session.name)+', '+esc(session.org)+'</div>';
+  h+='<h4>Summary</h4><p style="margin:0">A '+esc(s.short.toLowerCase())+' incident was discovered at '+utc(inc.discovered)+'. '+
+     (inc.pii?'Customer personal data may be affected'+(inc.eu?', including data of EU residents.':'.'):'No customer personal data is believed to be affected.')+
+     ' The response is in phase '+(cp+1)+' of 4 ('+esc(PHASES[cp])+'), with '+done.length+' of '+inc.steps.length+' planned steps completed.'+(inc.notes?' Notes: '+esc(inc.notes):'')+'</p>';
+  h+='<h4>Regulatory notifications</h4><div class="tw"><table><tr><th>Regulator</th><th>Deadline</th><th>Status</th></tr>';
+  REGS.forEach(function(r){
+    var on=r.applies(inc), due=inc.discovered+r.hours*3600000, f=inc.filed[r.id];
+    h+='<tr><td>'+esc(r.name)+' ('+esc(r.rule)+')</td><td>'+(on?utc(due):'Not applicable')+'</td><td>'+
+      (!on?esc(r.whyNot):f?'Filed '+utc(f)+(f>due?', late':', on time'):(due<now?'Overdue':'Pending, '+hms(Math.round((due-now)/1000))+' left'))+'</td></tr>';
+  });
+  h+='</table></div><h4>MITRE ATT&amp;CK techniques</h4><ul>';
+  s.attack.forEach(function(a){h+='<li>'+esc(a[0])+' '+esc(a[1])+'</li>'});
+  h+='</ul><h4>Actions completed</h4><ul>';
+  if(!done.length) h+='<li>None yet</li>';
+  done.forEach(function(x){h+='<li>'+esc(x.text)+' <span style="color:var(--muted)">(phase '+(x.phase+1)+', '+esc(x.by||'')+')</span></li>'});
+  h+='</ul><h4>Evidence chain</h4><p style="margin:0">'+inc.log.length+' entries, chain '+(chainOK===false?'broken':'intact')+'. Latest hash:</p><code>'+(inc.log.length?inc.log[inc.log.length-1].hash:'none')+'</code>';
+  return h;
+}
+$('open-report').addEventListener('click',function(){ verifyChain(true).then(function(){ $('report').innerHTML=reportHTML(); $('report-dlg').showModal(); }); });
+$('copy-report').addEventListener('click',function(){
+  var t=$('report').innerText;
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(function(){toast('Report copied')},function(){toast('Copy is blocked here. Select the text and copy it manually.')}); }
+  else toast('Copy is blocked here. Select the text and copy it manually.');
+});
+
+// --- Machine Learning & Phase 5 Integration ---
+var API_BASE = (function(){
+  if(window.location.protocol === 'file:') return 'http://127.0.0.1:8000';
+  if(window.location.port === '8000') return '';
+  return 'http://127.0.0.1:8000';
+})();
+
+var latestPrediction = null;
+var metricsLoaded = false;
+
+function switchConsoleTab(tabId){
+  document.querySelectorAll('.c-tab').forEach(function(b){
+    var active = b.dataset.ctab === tabId;
+    b.classList.toggle('active', active);
+    b.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
+  $('tab-view-incident').hidden = (tabId !== 'incident');
+  $('tab-view-threat').hidden = (tabId !== 'threat');
+  $('tab-view-metrics').hidden = (tabId !== 'metrics');
+
+  if(tabId === 'metrics' && !metricsLoaded) loadMLMetrics();
+}
+document.querySelectorAll('[data-ctab]').forEach(function(b){
+  b.addEventListener('click', function(){ switchConsoleTab(b.dataset.ctab); });
+});
+
+function checkMLStatus(){
+  var pill = $('ml-status-pill');
+  if(!pill) return;
+  fetch(API_BASE + '/api/ml/status')
+    .then(function(res){
+      if(!res.ok) throw new Error('Status ' + res.status);
+      return res.json();
+    })
+    .then(function(data){
+      if(data.status === 'ready'){
+        pill.className = 'ml-status-badge ready';
+        pill.innerHTML = '<span class="dot ok"></span> ML Model: READY (UNSW-NB15 RandomForest)';
+      } else {
+        pill.className = 'ml-status-badge offline';
+        pill.innerHTML = '<span class="dot off"></span> ML Model: NOT LOADED';
+      }
+    })
+    .catch(function(){
+      pill.className = 'ml-status-badge offline';
+      pill.innerHTML = '<span class="dot off"></span> ML Backend: OFFLINE (Start uvicorn on port 8000)';
+    });
+}
+
+var activePresetExtra = {};
+
+var PRESETS = {
+  exploit: { dur: 0.506, proto: "tcp", service: "http", state: "FIN", spkts: 12, dpkts: 26, sbytes: 860, dbytes: 26136, rate: 73.12, sttl: 62, dttl: 252, sload: 12474.3, ct_state_ttl: 1, ct_srv_src: 1, ct_dst_ltm: 1 },
+  generic: { dur: 0.000003, proto: "udp", service: "dns", state: "INT", spkts: 2, dpkts: 0, sbytes: 114, dbytes: 0, rate: 333333.3, sttl: 254, dttl: 0, sload: 152000000.0, ct_state_ttl: 2, ct_srv_src: 22, ct_dst_ltm: 22 },
+  fuzzers: { dur: 0.675, proto: "tcp", service: "ftp", state: "FIN", spkts: 12, dpkts: 12, sbytes: 2616, dbytes: 682, rate: 34.05, sttl: 254, dttl: 252, sload: 28400.0, ct_state_ttl: 1, ct_srv_src: 3, ct_dst_ltm: 2 },
+  recon: { dur: 0.179, proto: "tcp", service: "http", state: "FIN", spkts: 10, dpkts: 6, sbytes: 888, dbytes: 268, rate: 83.6, sttl: 254, dttl: 252, sload: 35670.0, ct_state_ttl: 1, ct_srv_src: 1, ct_dst_ltm: 1 },
+  normal: { dur: 0.121, proto: "tcp", service: "-", state: "FIN", spkts: 6, dpkts: 4, sbytes: 258, dbytes: 172, rate: 74.0, sttl: 252, dttl: 254, sload: 14158.0, ct_state_ttl: 0, ct_srv_src: 1, ct_dst_ltm: 1 }
+};
+
+function applyPreset(key){
+  var p = PRESETS[key];
+  if(!p) return;
+  activePresetExtra = {
+    ct_state_ttl: p.ct_state_ttl,
+    ct_srv_src: p.ct_srv_src,
+    ct_dst_ltm: p.ct_dst_ltm
+  };
+  $('tf-dur').value = p.dur;
+  $('tf-proto').value = p.proto;
+  $('tf-service').value = p.service;
+  $('tf-state').value = p.state;
+  $('tf-spkts').value = p.spkts;
+  $('tf-dpkts').value = p.dpkts;
+  $('tf-sbytes').value = p.sbytes;
+  $('tf-dbytes').value = p.dbytes;
+  $('tf-rate').value = p.rate;
+  $('tf-sttl').value = p.sttl;
+  $('tf-dttl').value = p.dttl;
+  $('tf-sload').value = p.sload;
+  toast('Loaded preset: ' + key.toUpperCase());
+}
+
+document.querySelectorAll('[data-preset]').forEach(function(b){
+  b.addEventListener('click', function(){ applyPreset(b.dataset.preset); });
+});
+
+$('btn-reset-threat').addEventListener('click', function(){
+  $('threat-form').reset();
+  $('pred-result-card').style.display = 'none';
+  latestPrediction = null;
+  activePresetExtra = {};
+  toast('Flow inputs reset');
+});
+
+$('threat-form').addEventListener('submit', function(e){
+  e.preventDefault();
+  var spinner = $('threat-spinner');
+  var btn = $('btn-run-predict');
+  spinner.style.display = 'inline';
+  btn.disabled = true;
+
+  var payload = Object.assign({
+    dur: parseFloat($('tf-dur').value) || 0.0,
+    proto: $('tf-proto').value,
+    service: $('tf-service').value,
+    state: $('tf-state').value,
+    spkts: parseInt($('tf-spkts').value, 10) || 0,
+    dpkts: parseInt($('tf-dpkts').value, 10) || 0,
+    sbytes: parseInt($('tf-sbytes').value, 10) || 0,
+    dbytes: parseInt($('tf-dbytes').value, 10) || 0,
+    rate: parseFloat($('tf-rate').value) || 0.0,
+    sttl: parseInt($('tf-sttl').value, 10) || 0,
+    dttl: parseInt($('tf-dttl').value, 10) || 0,
+    sload: parseFloat($('tf-sload').value) || 0.0
+  }, activePresetExtra);
+
+  fetch(API_BASE + '/api/ml/predict', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(function(res){
+    if(!res.ok) return res.json().then(function(err){ throw new Error(err.detail || 'Inference error ' + res.status); });
+    return res.json();
+  })
+  .then(function(data){
+    latestPrediction = data;
+    renderPredictionResult(data);
+    toast('Inference complete: ' + data.predicted_attack_category);
+  })
+  .catch(function(err){
+    toast('Prediction failed: ' + err.message);
+  })
+  .finally(function(){
+    spinner.style.display = 'none';
+    btn.disabled = false;
+  });
+});
+
+function renderPredictionResult(data){
+  var card = $('pred-result-card');
+  card.style.display = 'block';
+
+  $('pred-meta-time').textContent = 'INFERENCE LATENCY: ' + data.inference_time_ms + ' MS  |  EVALUATED ' + data.features_evaluated + ' FLOW FEATURES';
+  $('pred-cat-name').textContent = data.predicted_attack_category;
+
+  var badges = '';
+  if(data.is_attack){
+    badges += '<span class="pill crit">Attack Detected</span>';
+  } else {
+    badges += '<span class="pill" style="background:var(--mint); color:var(--green); font-weight:600;">Normal Benign Traffic</span>';
+  }
+  badges += '<span class="pill phase">Confidence: ' + data.confidence_percentage + '</span>';
+  badges += '<span class="pill">' + esc(data.severity) + ' Severity</span>';
+  $('pred-pill-badges').innerHTML = badges;
+
+  $('pred-sev-text').textContent = data.severity;
+  $('pred-mitre-text').textContent = data.mitre_attack;
+
+  // Render class probabilities
+  var probHtml = '';
+  var sorted = Object.entries(data.class_probabilities).sort(function(a,b){ return b[1] - a[1]; });
+  sorted.forEach(function(item){
+    var cat = item[0];
+    var p = item[1];
+    var pct = (p * 100).toFixed(2);
+    probHtml += '<div class="prob-row">' +
+      '<div style="font-weight:' + (cat === data.predicted_attack_category ? '600' : '400') + ';">' + esc(cat) + '</div>' +
+      '<div class="prob-track"><div class="prob-fill" style="width:' + pct + '%;' + (cat === data.predicted_attack_category ? 'background:var(--tide-deep);' : '') + '"></div></div>' +
+      '<div class="prob-val">' + pct + '%</div>' +
+    '</div>';
+  });
+  $('pred-prob-list').innerHTML = probHtml;
+
+  card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+$('btn-attach-evidence').addEventListener('click', function(){
+  if(!latestPrediction){ toast('No prediction to attach'); return; }
+  appendLog(
+    'AI Threat Classification: ' + latestPrediction.predicted_attack_category + ' (' + latestPrediction.confidence_percentage + ')',
+    'ML Model (UNSW-NB15)',
+    'MITRE: ' + latestPrediction.mitre_attack + ' | Latency: ' + latestPrediction.inference_time_ms + 'ms'
+  );
+  toast('Analysis attached to tamper-evident evidence log');
+});
+
+function loadMLMetrics(){
+  var btn = $('btn-fetch-metrics');
+  if(btn) btn.disabled = true;
+  fetch(API_BASE + '/api/ml/metrics')
+    .then(function(res){
+      if(!res.ok) throw new Error('Status ' + res.status);
+      return res.json();
+    })
+    .then(function(data){
+      metricsLoaded = true;
+      var s = data.summary;
+      $('val-acc').textContent = (s.accuracy * 100).toFixed(2) + '%';
+      $('val-f1w').textContent = (s.weighted_f1 * 100).toFixed(2) + '%';
+      $('val-pw').textContent = (s.weighted_precision * 100).toFixed(2) + '%';
+      $('val-rw').textContent = (s.weighted_recall * 100).toFixed(2) + '%';
+      $('val-f1m').textContent = (s.macro_f1 * 100).toFixed(2) + '%';
+      $('val-pm').textContent = (s.macro_precision * 100).toFixed(2) + '%';
+      $('val-rm').textContent = (s.macro_recall * 100).toFixed(2) + '%';
+
+      // Render per-class classification report table
+      var tbody = '';
+      var rep = data.per_class_report;
+      var classes = data.confusion_matrix.labels || Object.keys(rep).filter(function(k){ return !k.includes('avg') && k !== 'accuracy'; });
+      classes.forEach(function(c){
+        if(!rep[c]) return;
+        var row = rep[c];
+        tbody += '<tr style="border-bottom:1px solid var(--line);">' +
+          '<td style="padding:8px 10px; font-weight:600;">' + esc(c) + '</td>' +
+          '<td style="padding:8px 10px; font-variant-numeric:tabular-nums;">' + (row.precision * 100).toFixed(2) + '%</td>' +
+          '<td style="padding:8px 10px; font-variant-numeric:tabular-nums;">' + (row.recall * 100).toFixed(2) + '%</td>' +
+          '<td style="padding:8px 10px; font-variant-numeric:tabular-nums; font-weight:500;">' + (row['f1-score'] * 100).toFixed(2) + '%</td>' +
+          '<td style="padding:8px 10px; font-variant-numeric:tabular-nums; color:var(--muted);">' + Number(row.support).toLocaleString() + '</td>' +
+        '</tr>';
+      });
+      $('tbody-per-class').innerHTML = tbody;
+
+      // Render confusion matrix
+      renderConfusionMatrix(data.confusion_matrix);
+      toast('ML metrics loaded from backend');
+    })
+    .catch(function(err){
+      toast('Could not fetch metrics: ' + err.message);
+    })
+    .finally(function(){
+      if(btn) btn.disabled = false;
+    });
+}
+$('btn-fetch-metrics').addEventListener('click', loadMLMetrics);
+
+function renderConfusionMatrix(cm){
+  if(!cm || !cm.matrix || !cm.labels) return;
+  var labels = cm.labels;
+  var m = cm.matrix;
+
+  var html = '<table class="matrix-table"><thead><tr><th style="text-align:left; padding-left:12px;">True \\ Predicted</th>';
+  labels.forEach(function(l){ html += '<th>' + esc(l.slice(0,6)) + '</th>'; });
+  html += '</tr></thead><tbody>';
+
+  m.forEach(function(row, rIdx){
+    html += '<tr><td style="text-align:left; padding-left:12px; font-weight:600; background:var(--wash);">' + esc(labels[rIdx]) + '</td>';
+    row.forEach(function(val, cIdx){
+      var isDiag = (rIdx === cIdx);
+      var cls = isDiag ? 'diag' : (val > 0 ? 'nz' : '');
+      html += '<td class="' + cls + '">' + Number(val).toLocaleString() + '</td>';
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  $('matrix-container').innerHTML = html;
+}
+
+function tick(){ heroTick(); if(!$('view-console').hidden&&inc) renderClocks(); }
+tick(); setInterval(tick,1000);
+route();
+})();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(function(){
+  var btns=[].slice.call(document.querySelectorAll('.btn-glass'));
+  var heroBtns=[].slice.call(document.querySelectorAll('.hero-actions .btn-glass')), navBtns=[].slice.call(document.querySelectorAll('.nav-actions .btn-glass'));
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!window.gsap){document.documentElement.classList.add('no-gsap');return}
+  if(!reduce){
+    gsap.from(navBtns,{x:48,opacity:0,duration:.8,ease:'power3.out',stagger:.12,delay:.1,clearProps:'transform,opacity'});
+    gsap.from(heroBtns,{x:-48,opacity:0,duration:.9,ease:'power3.out',stagger:.14,delay:.35,clearProps:'transform,opacity'});
+  }
+  btns.forEach(function(b){
+    var fill=b.querySelector('.g-fill'), sheen=b.querySelector('.g-sheen');
+    function enter(){
+      gsap.to(fill,{xPercent:0,x:0,duration:reduce?0:.5,ease:'power3.out',overwrite:true});
+      if(!reduce) gsap.fromTo(sheen,{x:0,xPercent:-160},{xPercent:320,duration:.8,ease:'power2.out',overwrite:true});
+    }
+    function leave(){ gsap.to(fill,{xPercent:101,duration:reduce?0:.45,ease:'power3.in',overwrite:true,onComplete:function(){gsap.set(fill,{xPercent:-101})}}); }
+    gsap.set(fill,{xPercent:-101,x:0});
+    b.addEventListener('mouseenter',enter); b.addEventListener('focus',enter);
+    b.addEventListener('mouseleave',leave); b.addEventListener('blur',leave);
+    b.addEventListener('pointerdown',function(){ gsap.fromTo(b,{scale:.97},{scale:1,duration:.35,ease:'back.out(3)'}) });
+  });
+})();
+</script>
+</body>
+</html>
